@@ -1,0 +1,58 @@
+CREATE DATABASE IF NOT EXISTS cinema_montreal
+    DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+    
+USE cinema_montreal;
+
+DROP TABLE IF EXISTS Commentaires;
+DROP TABLE IF EXISTS Horaires;
+DROP TABLE IF EXISTS Films;
+DROP TABLE IF EXISTS Cinemas;
+
+
+CREATE TABLE Films (
+    idFilm INT PRIMARY KEY AUTO_INCREMENT,
+    uuid VARCHAR(36) NOT NULL UNIQUE,
+    titre VARCHAR(255) NOT NULL UNIQUE,
+    pays VARCHAR(100) NOT NULL,
+    genre VARCHAR(20) NOT NULL,
+    classe VARCHAR(3) NOT NULL,
+    duree INT NOT NULL,
+    realisateur VARCHAR(100) NOT NULL,
+    imageUrl VARCHAR(255) DEFAULT ""
+) CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+
+CREATE TABLE Cinemas (
+    idCinema INT PRIMARY KEY AUTO_INCREMENT,
+    uuid VARCHAR(36) NOT NULL UNIQUE,
+    nom VARCHAR(100) NOT NULL UNIQUE,
+    ville VARCHAR(100) NOT NULL,
+    adresse VARCHAR(255) NOT NULL,
+    codePostal VARCHAR(6) NOT NULL,
+    telephone VARCHAR(11) NOT NULL
+) CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+
+CREATE TABLE Commentaires (
+    idCommentaire INT PRIMARY KEY AUTO_INCREMENT,
+    idFilm INT NOT NULL,
+    uuid VARCHAR(36) NOT NULL UNIQUE,
+    texte VARCHAR(255) NOT NULL,
+    note INT NOT NULL,
+    auteur VARCHAR(100) NOT NULL,
+    dateHeure TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (idFilm)
+        REFERENCES Films(idFilm)
+) CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+
+CREATE TABLE Horaires (
+    idHoraire INT PRIMARY KEY AUTO_INCREMENT,
+    idFilm INT NOT NULL,
+    idCinema INT NOT NULL,
+    dateHeure TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (idFilm)
+        REFERENCES Films(idFilm),
+    FOREIGN KEY (idCinema)
+        REFERENCES Cinemas(idCinema)
+) CHARACTER SET utf8 COLLATE utf8_general_ci;
