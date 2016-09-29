@@ -44,43 +44,60 @@ module.exports = class FilmLogic {
     
     handleFields(film, fields, callback) {
         let filmResponse = {};
+        let filmCopy = (JSON.parse(JSON.stringify(film)));
+        this.deleteAll(film);
         
         async.each(fields, function HandleFilm(field, next) {
             switch (field) {
                 case 'titre':
-                    filmResponse.titre = film.titre;
+                    filmResponse.titre = filmCopy.titre;
                     break;
                 case 'pays':
-                    filmResponse.pays = film.pays;
+                    filmResponse.pays = filmCopy.pays;
                     break;
                 case 'genre':
-                    filmResponse.genre = film.genre;
+                    filmResponse.genre = filmCopy.genre;
                     break;
                 case 'classe':
-                    filmResponse.classe = film.classe;
+                    filmResponse.classe = filmCopy.classe;
                     break;
                 case 'duree':
-                    filmResponse.duree = film.duree;
+                    filmResponse.duree = filmCopy.duree;
                     break;
                 case 'realisateur':
-                    filmResponse.realisateur = film.realisteur;
+                    filmResponse.realisateur = filmCopy.realisateur;
                     break;
                 case 'imageUrl':
-                    filmResponse.imageUrl = film.imageUrl;
+                    filmResponse.imageUrl = filmCopy.imageUrl;
                     break;
                 case 'url':
-                    filmResponse.url = film.url;
+                    filmResponse.url = filmCopy.url;
                     break;
                 case 'commentaires':
-                    filmResponse.commentaires = film.commentaires;
+                    filmResponse.commentaires = filmCopy.commentaires;
                     break;
                 default:
                     break;
             }
             next();
         }, function End() {
-            callback(filmResponse);
+            for (let key in filmResponse) {
+                film[key] = filmResponse[key];
+            }
+            callback(film);
         });
+    }
+    
+    deleteAll(film) {
+        delete film.commentaires;
+        delete film.url;
+        delete film.imageUrl;
+        delete film.realisateur;
+        delete film.duree;
+        delete film.classe;
+        delete film.genre;
+        delete film.pays;
+        delete film.titre;
     }
     
     retrieveCommentaires(film, callback) {

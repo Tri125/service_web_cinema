@@ -29,19 +29,20 @@ class FilmRoutes extends Route {
     
     postFilm(req, res) {
         let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
+        res.send(error);
     }
     
     getAll(req, res) {
         super.createResponse(res);
         let offset = null;
         let limit = null;
-        let fields = null;
+        let fieldsParam = null;
         
         //Fields
-        if (req.query.fields) {
-            fields = req.query.fields;
-        }
+	    if (req.query.fields) {
+	        fieldsParam = req.query.fields;
+	        fieldsParam = super.prepareFields(fieldsParam);
+	    }
 
         //Pagination
         if (req.query.offset && req.query.limit) {
@@ -55,7 +56,7 @@ class FilmRoutes extends Route {
             viewCommentaires = 'default';
         }
         
-        let filmsQuery = queries.selectFilms(fields, limit, offset);
+        let filmsQuery = queries.selectFilms('*', limit, offset);
 
         connexion.query(filmsQuery, (error, rows, fields) => {
             if (error) {
@@ -73,8 +74,15 @@ class FilmRoutes extends Route {
                         } else {
                             filmLogic.addCommentaires(film, resultCommentaire.commentaires);
                         }
-                        
-                        next();
+                        let filmCopy = film;
+                        if (fieldsParam) {
+                            filmLogic.handleFields(filmCopy, fieldsParam, (film) => {
+                                console.log(film);
+                                next();
+                            });
+                        } else {
+                            next();
+                        }
                     });
                 }, function SendResponse() {
                     res.send(rows);
