@@ -1,3 +1,5 @@
+var validator = require('validator');
+
 class Route {
     constructor(app) {
         this.app = app;       
@@ -23,6 +25,23 @@ class Route {
             fields[index] = fields[index].trim();
         }
         return fields;
+    }
+    
+    validateLimitOffset(limit, offset) {
+        let validationRules = { min: 0};
+        if (validator.isInt(limit, validationRules) && validator.isInt(offset, validationRules)) {
+            return true;
+        }
+        return false;
+    }
+    
+    isJson(str) {
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
     }
 }
 

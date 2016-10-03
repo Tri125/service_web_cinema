@@ -1,8 +1,10 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var expressValidator = require('express-validator');
 
 app.use(bodyParser.json());
+app.use(expressValidator());
 const FilmRoutes = require("./routes/FilmRoutes");
 const CinemaRoutes = require("./routes/CinemaRoutes");
 

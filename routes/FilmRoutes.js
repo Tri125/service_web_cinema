@@ -1,6 +1,8 @@
 const uuid = require("node-uuid");
 const async = require('async');
 
+const validationFilm = require('../validation/film');
+
 const Route = require('../core/Routes');
 const connexion = require('../helpers/database');
 
@@ -13,11 +15,12 @@ const queries = new QueryHelper();
 const CommentaireLogic = require("../logic/CommentaireLogic");
 const commentaireLogic = new CommentaireLogic();
 
+
 class FilmRoutes extends Route {
 
     constructor(app) {
         super(app);
-        app.post('/films/', this.postFilm); // TODO 
+        app.post('/films/',this.postFilm); // TODO 
         app.get('/films/', this.getAll); // TODO
         app.get('/films/:uuidFilm', this.get); // TODO
         app.patch('/films/:uuidFilm', this.patchFilm); // TODO
@@ -28,8 +31,32 @@ class FilmRoutes extends Route {
     }
     
     postFilm(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error);
+        req.checkBody(validationFilm.Required());
+        var errorValidation = req.validationErrors();
+        if (errorValidation) {
+            res.status(500);
+            let error = super.createError(500, "Erreur de validation", errorValidation);
+            res.send(error);
+            return;
+        }
+        req.body.uuid = uuid.v4();
+        let filmQuery = queries.insertFilm(req.body);
+        
+        connexion.query(filmQuery, (error, result) => {
+            if (error) {
+                res.status(500);
+                let errorMessage = super.createError(500, "Erreur de Serveur", error);
+                res.send(errorMessage);
+            } else {
+                filmLogic.linking(req.body);
+                res.status(201);
+                res.location(req.body.url)
+                res.send(req.body);                
+            }
+            
+        });
+        
+
     }
     
     getAll(req, res) {
@@ -46,8 +73,12 @@ class FilmRoutes extends Route {
 
         //Pagination
         if (req.query.offset && req.query.limit) {
-            offset = req.query.offset;
-            limit = req.query.limit;
+            if (super.validateLimitOffset(req.query.limit,req.query.offset) ){
+                offset = req.query.offset;
+                limit = req.query.limit;
+                console.log(limit);
+                console.log(offset);
+            }
         }
         
 	    let viewCommentaires = 'link';
