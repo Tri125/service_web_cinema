@@ -23,7 +23,7 @@ class FilmRoutes extends Route {
         app.post('/films/',this.postFilm); // TODO 
         app.get('/films/', this.getAll); // TODO
         app.get('/films/:uuidFilm', this.get); // TODO
-        app.patch('/films/:uuidFilm', this.patchFilm); // TODO
+        app.patch('/films/:uuidFilm', this.patch); // TODO
         app.delete('/films/:uuidFilm', this.deleteFilm); // TODO
         app.get('/films/:uuidFilm/commentaires/', this.getComms); // TODO
         app.post('/films/:uuidFilm/commentaires/', this.postComm); // TODO
@@ -31,6 +31,7 @@ class FilmRoutes extends Route {
     }
     
     postFilm(req, res) {
+        super.createResponse(res);
         req.checkBody(validationFilm.Required());
         var errorValidation = req.validationErrors();
         if (errorValidation) {
@@ -50,7 +51,7 @@ class FilmRoutes extends Route {
             } else {
                 filmLogic.linking(req.body);
                 res.status(201);
-                res.location(req.body.url)
+                res.location(req.body.url);
                 res.send(req.body);                
             }
             
@@ -76,8 +77,6 @@ class FilmRoutes extends Route {
             if (super.validateLimitOffset(req.query.limit,req.query.offset) ){
                 offset = req.query.offset;
                 limit = req.query.limit;
-                console.log(limit);
-                console.log(offset);
             }
         }
         
@@ -99,7 +98,7 @@ class FilmRoutes extends Route {
                 async.each(rows, function HandleFilm(film, next) {
                     let uuid = film.uuid;
                     filmLogic.linking(film);
-                    commentaireLogic.retrieveView(uuid, viewCommentaires, (resultCommentaire) => {
+                    commentaireLogic.retrieveView(uuid, viewCommentaires, null, null, (resultCommentaire) => {
                         if (resultCommentaire.error) {
                             //Gestion
                         } else {
@@ -140,7 +139,7 @@ class FilmRoutes extends Route {
         
         filmLogic.retrieve('*', req.params.uuidFilm, (result) => {
             if (result.error) {
-                res.status(500)
+                res.status(500);
                 let errorResponse = super.createError(500, "Erreur Serveur", result.error);
                 res.send(errorResponse);
             } else if (result.length === 0) {
@@ -149,7 +148,7 @@ class FilmRoutes extends Route {
             } else {
                 res.status(200);
                 let filmResponse = result.film;
-                commentaireLogic.retrieveView(req.params.uuidFilm, viewCommentaires, (resultCommentaire) => {
+                commentaireLogic.retrieveView(req.params.uuidFilm, viewCommentaires, null, null, (resultCommentaire) => {
                     if (resultCommentaire.error) {
                         //Gestion
                     } else {
@@ -167,15 +166,43 @@ class FilmRoutes extends Route {
         });
     }
     
-    patchFilm(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
+    patch(req, res) {
+        super.createResponse(res);
+        req.checkBody(validationFilm.Optional());
+        var errorValidation = req.validationErrors();
+        if (errorValidation) {
+            res.status(500);
+            let error = super.createError(500, "Erreur de validation", errorValidation);
+            res.send(error);
+            return;
+        }
+        filmLogic.handlePatch(req.params.uuidFilm, req.body, (result) => {
+            if (result.error) {
+                res.status(500);
+                let errorResponse = super.createError(500, "Erreur Serveur", result.error);
+                res.send(errorResponse);
+            } else {
+                res.status(200);
+                res.send(result.film);
+            }
+        });
         
     }
     
     deleteFilm(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
+        super.createResponse(res);
+        let filmsQuery = queries.deleteFilm(req.params.uuidFilm);
+
+        connexion.query(filmsQuery, (error, rows) => {
+            if (error) {
+                res.status(500);
+                let errorResponse = super.createError(500, "Erreur Serveur", error);
+                res.send(errorResponse);
+            } else {
+                res.status(204);
+                res.send();
+            }
+        });
         
     }
     
@@ -186,26 +213,22 @@ class FilmRoutes extends Route {
         
         //Pagination
         if (req.query.offset && req.query.limit) {
-            offset = req.query.offset;
-            limit = req.query.limit;
+            if (super.validateLimitOffset(req.query.limit,req.query.offset) ){
+                offset = req.query.offset;
+                limit = req.query.limit;
+            }
         }
         
-        let commentairesQuery = queries.selectFilms(null, offset, limit);
-        
-        connexion.query(commentairesQuery, (error, rows, fields) => {
-            if (error) {
-                res.status(500);
-                let errorResponse = super.createError(500, "Erreur Serveur", error);
-                res.send(errorResponse);
-            } else if (true){ //TODO
+       commentaireLogic.retrieve(req.params.uuidFilm, limit, offset, (result) => {
+           if (result.error) {
+               res.status(500);
+               let errorResponse = super.createError(500, "Erreur Serveur", result.error);
+               res.send(errorResponse);
+            } else {
                 res.status(200);
-                
+                res.send(result.commentaires);
             }
-        });
-        
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
-        
+       });
     }
 
     postComm(req, res) {
@@ -215,9 +238,20 @@ class FilmRoutes extends Route {
     }
     
     delComm(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
+        super.createResponse(res);
         
+        let commentaireQuery = queries.deleteCommentaire(req.params.uuidCommentaire);
+        
+        connexion.query(commentaireQuery, (error, rows) => {
+            if (error) {
+               res.status(500);
+               let errorResponse = super.createError(500, "Erreur Serveur", error);
+               res.send(errorResponse);
+            } else {
+                res.status(204);
+                res.send();
+            }
+        });
     }
 }
 

@@ -42,7 +42,7 @@ CREATE TABLE Commentaires (
     auteur VARCHAR(100) NOT NULL,
     dateHeure TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (idFilm)
-        REFERENCES Films(idFilm)
+        REFERENCES Films(idFilm) ON DELETE CASCADE
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 
@@ -52,7 +52,7 @@ CREATE TABLE Horaires (
     idCinema INT NOT NULL,
     dateHeure TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (idFilm)
-        REFERENCES Films(idFilm),
+        REFERENCES Films(idFilm) ON DELETE CASCADE,
     FOREIGN KEY (idCinema)
         REFERENCES Cinemas(idCinema)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;

@@ -111,4 +111,39 @@ module.exports = class FilmLogic {
            callback(film);
        });
     }
-}
+    
+    handlePatch(uuid, film, callback) {
+        let query = queries.patchFilm(uuid, film);
+        
+        connexion.query(query, (error, patchResult) => {
+            let result = {};
+            
+            if (error) {
+                result.error = error;
+                callback(result);
+            } else {
+                this.retrieve('*', uuid, (resultFilm) => {
+                    if (resultFilm.error) {
+                        result.error = resultFilm.error;
+                        callback(result);
+                    } else if (resultFilm.length === 0) {
+                        result.error = "Le film n'existe pas.";
+                        callback(result);
+                    } else {
+                        let filmResponse = resultFilm.film;
+                        commentaireLogic.retrieveView(uuid, 'link', (resultCommentaire) => {
+                            if (resultCommentaire.error) {
+                                //Gestion
+                            } else {
+                                this.addCommentaires(filmResponse, resultCommentaire.commentaires);
+                            }
+                            result.film = filmResponse;
+                            callback(result);
+                            
+                        });
+                    }
+                });
+            }
+        });
+    }
+};

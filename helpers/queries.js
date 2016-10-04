@@ -25,16 +25,56 @@ class Queries {
     }
     
     insertFilm(film) {
-        let query = "INSERT INTO Films (uuid, titre, pays, duree, genre, classe, realisateur) VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}) ";
+        let query = "INSERT INTO Films (uuid, titre, pays, duree, genre, classe, realisateur, imageUrl) VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}) ";
         query = query.format(connexion.escape(film.uuid), connexion.escape(film.titre), connexion.escape(film.pays), connexion.escape(film.duree), 
-        connexion.escape(film.genre), connexion.escape(film.classe), connexion.escape(film.realisateur));
+        connexion.escape(film.genre), connexion.escape(film.classe), connexion.escape(film.realisateur), connexion.escape(film.imageUrl));
         
         return query;
     }
     
-    selectFilmCommentaires(uuid, offset = null, limit = null) {
+    patchFilm(uuid, film) {
+        let query = "UPDATE Films SET ";
+        if (film.titre)
+            query += "titre = '" + film.titre + "',";
+        if (film.pays)
+            query += "pays = '" + film.pays + "',";
+        if (film.genre)
+            query += "genre = '" + film.genre + "',";
+        if (film.classe)
+            query += "classe = '" + film.classe + "',";
+        if (film.duree)
+            query += "duree =" + film.duree + ",";              
+        if (film.realisateur)
+            query += "realisateur = '" + film.realisateur + "',";
+        if (film.imageUrl)
+            query += "imageUrl = '" + film.imageUrl + "' ";
+            
+        if (query.slice(-1) === ',') {
+            query = query.substr(0, query.length -1);
+        }    
+            
+        query += " WHERE uuid = '" + uuid + "'";
         
-        let query = "SELECT c.uuid, c.texte, c.note, c.auteur, c.dateHeure FROM Commentaires AS c INNER JOIN Films AS f ON c.idFilm = f.idFilm WHERE f.uuid = '{0}'"
+        return query;
+    }
+    
+    deleteFilm (uuid) {
+        let query = "DELETE FROM Films WHERE uuid = {0}";
+        query = query.format(connexion.escape(uuid));
+        
+        return query;
+    }
+    
+    deleteCommentaire(uuid) {
+        let query = "DELETE FROM Commentaires WHERE uuid = {0}";
+        query = query.format(connexion.escape(uuid));
+        
+        return query;
+    }
+    
+    selectFilmCommentaires(uuid, limit = null, offset = null) {
+        
+        let query = "SELECT c.uuid, c.texte, c.note, c.auteur, c.dateHeure FROM Commentaires AS c INNER JOIN Films AS f ON c.idFilm = f.idFilm WHERE f.uuid = '{0}'";
         query = query.format(uuid);
         
         query = this.handlePagination(query, offset, limit);

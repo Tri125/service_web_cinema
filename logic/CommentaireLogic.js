@@ -41,14 +41,14 @@ module.exports = class CommentaireLogic {
         }
     }
 
-    retrieve(filmUuid, callback) {
-        this.retrieveView(filmUuid, 'default', (result) => {
+    retrieve(filmUuid, limit = null, offset = null, callback) {
+        this.retrieveView(filmUuid, 'default', limit, offset, (result) => {
             callback(result);
         });
     }
 
-    retrieveView(filmUuid, view, callback) {
-        let query = queries.selectFilmCommentaires(filmUuid);
+    retrieveView(filmUuid, view, limit = null, offset = null, callback) {
+        let query = queries.selectFilmCommentaires(filmUuid, limit, offset);
         
         connexion.query(query, (error, rows, fields) => {
             let result = {};
