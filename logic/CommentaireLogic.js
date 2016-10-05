@@ -5,11 +5,13 @@ const async = require("async");
 const QueryHelper = require('../helpers/queries');
 const queries = new QueryHelper();
 
+
 module.exports = class CommentaireLogic {
     
     linking(uuidFilm, commentaire) {
         commentaire.url = utils.baseUrl + "/films/" + uuidFilm + "/commentaires/" + commentaire.uuid;
-        
+        commentaire.film = {};
+        commentaire.film.url = utils.baseUrl + "/films/" + uuidFilm;
         delete commentaire.idFilm;
         delete commentaire.idCommentaire;
         delete commentaire.uuid;
@@ -25,6 +27,7 @@ module.exports = class CommentaireLogic {
         delete commentaire.auteur;
         delete commentaire.dateHeure;
         delete commentaire.texte;
+        delete commentaire.film;
     }
     
     applyView(view, uuidFilm, commentaire) {
@@ -41,7 +44,25 @@ module.exports = class CommentaireLogic {
         }
     }
 
-    retrieve(filmUuid, limit = null, offset = null, callback) {
+    retrieve(uuid, filmUuid, view, callback) {
+        let query = queries.selectCommentaire(uuid);
+        
+        connexion.query(query, (error, rows, fields) => {
+            let result = {};
+            if (error) {
+                result.error = error;
+            } else if (rows.length === 0) {
+                result.length = 0;
+            } else {
+                result.commentaire = rows[0];
+                this.applyView(view, filmUuid, result.commentaire);
+            }
+            callback(result);
+        });        
+    }
+    
+
+    retrieveFromFilm(filmUuid, limit = null, offset = null, callback) {
         this.retrieveView(filmUuid, 'default', limit, offset, (result) => {
             callback(result);
         });

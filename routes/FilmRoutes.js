@@ -2,6 +2,7 @@ const uuid = require("node-uuid");
 const async = require('async');
 
 const validationFilm = require('../validation/film');
+const validationCommentaire = require('../validation/commentaire');
 
 const Route = require('../core/Routes');
 const connexion = require('../helpers/database');
@@ -20,14 +21,14 @@ class FilmRoutes extends Route {
 
     constructor(app) {
         super(app);
-        app.post('/films/',this.postFilm); // TODO 
-        app.get('/films/', this.getAll); // TODO
-        app.get('/films/:uuidFilm', this.get); // TODO
-        app.patch('/films/:uuidFilm', this.patch); // TODO
-        app.delete('/films/:uuidFilm', this.deleteFilm); // TODO
-        app.get('/films/:uuidFilm/commentaires/', this.getComms); // TODO
-        app.post('/films/:uuidFilm/commentaires/', this.postComm); // TODO
-        app.delete('/films/:uuidFilm/commentaires/:uuidCommentaire', this.delComm); // TODO
+        app.post('/films/',this.postFilm);
+        app.get('/films/', this.getAll);
+        app.get('/films/:uuidFilm', this.get);
+        app.patch('/films/:uuidFilm', this.patch);
+        app.delete('/films/:uuidFilm', this.deleteFilm);
+        app.get('/films/:uuidFilm/commentaires/', this.getComms);
+        app.post('/films/:uuidFilm/commentaires/', this.postComm);
+        app.delete('/films/:uuidFilm/commentaires/:uuidCommentaire', this.delComm);
     }
     
     postFilm(req, res) {
@@ -219,7 +220,7 @@ class FilmRoutes extends Route {
             }
         }
         
-       commentaireLogic.retrieve(req.params.uuidFilm, limit, offset, (result) => {
+       commentaireLogic.retrieveFromFilm(req.params.uuidFilm, limit, offset, (result) => {
            if (result.error) {
                res.status(500);
                let errorResponse = super.createError(500, "Erreur Serveur", result.error);
@@ -232,9 +233,39 @@ class FilmRoutes extends Route {
     }
 
     postComm(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error)
+        super.createResponse(res);
+        req.checkBody(validationCommentaire.Required());
+        var errorValidation = req.validationErrors();
+        if (errorValidation) {
+            res.status(500);
+            let error = super.createError(500, "Erreur de validation", errorValidation);
+            res.send(error);
+            return;
+        }
+        req.body.uuid = uuid.v4();
+        req.body.filmUuid = req.params.uuidFilm;
+        let commentaireQuery = queries.insertCommentaire(req.body);
         
+        connexion.query(commentaireQuery, (error, result) => {
+            if (error) {
+                res.status(500);
+                let errorMessage = super.createError(500, "Erreur de Serveur", error);
+                res.send(errorMessage);
+            } else {
+                commentaireLogic.retrieve(req.body.uuid, req.params.uuidFilm, 'default', (result) => {
+                    if (result.error) {
+                        res.status(500);
+                        let errorMessage = super.createError(500, "Erreur de Serveur", error);
+                        res.send(errorMessage);
+                    } else {
+                        res.status(201);
+                        res.location(result.commentaire.url);
+                        res.send(result.commentaire);   
+                    }
+                });
+            }
+            
+        });
     }
     
     delComm(req, res) {

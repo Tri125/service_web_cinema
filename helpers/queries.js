@@ -32,6 +32,14 @@ class Queries {
         return query;
     }
     
+    insertCommentaire(commentaire) {
+        let query = "INSERT INTO Commentaires (idFilm, uuid, texte, note, auteur) VALUES ( (SELECT idFilm FROM Films AS f WHERE f.uuid = {0}), {1}, {2}, {3}, {4})";
+        query = query.format(connexion.escape(commentaire.filmUuid), connexion.escape(commentaire.uuid), connexion.escape(commentaire.texte),
+        connexion.escape(commentaire.note), connexion.escape(commentaire.auteur));
+    
+        return query;
+    }
+    
     patchFilm(uuid, film) {
         let query = "UPDATE Films SET ";
         if (film.titre)
@@ -78,6 +86,13 @@ class Queries {
         query = query.format(uuid);
         
         query = this.handlePagination(query, offset, limit);
+        return query;
+    }
+    
+    selectCommentaire(uuid) {
+        let query = "SELECT * FROM Commentaires WHERE uuid = {0}";
+        query = query.format(connexion.escape(uuid));
+        
         return query;
     }
     
