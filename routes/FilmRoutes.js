@@ -51,6 +51,7 @@ class FilmRoutes extends Route {
                 res.send(errorMessage);
             } else {
                 filmLogic.linking(req.body);
+                req.body.commentaires = [];
                 res.status(201);
                 res.location(req.body.url);
                 res.send(req.body);                
@@ -108,7 +109,6 @@ class FilmRoutes extends Route {
                         let filmCopy = film;
                         if (fieldsParam) {
                             filmLogic.handleFields(filmCopy, fieldsParam, (film) => {
-                                console.log(film);
                                 next();
                             });
                         } else {

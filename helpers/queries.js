@@ -24,11 +24,42 @@ class Queries {
         return query;
     }
     
+    selectHoraireCinema(uuidCinema) {
+        let query = "SELECT h.idHoraire, f.uuid AS uuidFilm, c.uuid AS uuidCinema, dateHeure FROM Horaires AS h INNER JOIN Cinemas AS c ON c.idCinema = h.idCinema INNER JOIN Films AS f ON f.idFilm = h.idFilm  WHERE c.uuid = {0}"; 
+        query = query.format(connexion.escape(uuidCinema));
+        return query;
+    }
+    
+    selectCinemas(fields = "*", limit = null, offset = null) {
+        if (!fields) {
+            fields = "*";
+        }
+        let query = "SELECT " + fields + " FROM Cinemas";
+        query = this.handlePagination(query, offset, limit);
+        return query;
+    }
+    
+    selectCinema(uuid, fields = "*") {
+        if (!fields) {
+            fields = "*";
+        }
+        let query = "SELECT " + fields + " FROM Cinemas WHERE uuid = {0}";
+        query = query.format(connexion.escape(uuid));
+        return query;
+    }
+    
     insertFilm(film) {
         let query = "INSERT INTO Films (uuid, titre, pays, duree, genre, classe, realisateur, imageUrl) VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}) ";
         query = query.format(connexion.escape(film.uuid), connexion.escape(film.titre), connexion.escape(film.pays), connexion.escape(film.duree), 
         connexion.escape(film.genre), connexion.escape(film.classe), connexion.escape(film.realisateur), connexion.escape(film.imageUrl));
         
+        return query;
+    }
+    
+    insertCinema(cinema) {
+        let query = "INSERT INTO Cinemas (uuid, nom, adresse, ville, codePostal, telephone) VALUES ({0}, {1}, {2}, {3}, {4}, {5})";
+        query = query.format(connexion.escape(cinema.uuid), connexion.escape(cinema.nom), connexion.escape(cinema.adresse),
+        connexion.escape(cinema.ville), connexion.escape(cinema.codePostal), connexion.escape(cinema.telephone) );
         return query;
     }
     

@@ -24,7 +24,7 @@ module.exports = class CommentaireValidator {
         notEmpty: true,
         isLength: {
           options: [{ min: 1, max: 100}],
-          errorMessage: "Doit être compris entre 1 et 20 caractères."
+          errorMessage: "Doit être compris entre 1 et 100 caractères."
         },
         errorMessage: "Auteur est requis."
         
@@ -60,7 +60,7 @@ module.exports = class CommentaireValidator {
           notEmpty: true,
           isLength: {
               options: [{ min: 1, max: 100}],
-              errorMessage: "Doit être compris entre 1 et 20 caractères."
+              errorMessage: "Doit être compris entre 1 et 100 caractères."
           },
           errorMessage: "Auteur est requis."
       }

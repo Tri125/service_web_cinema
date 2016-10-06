@@ -56,3 +56,7 @@ CREATE TABLE Horaires (
     FOREIGN KEY (idCinema)
         REFERENCES Cinemas(idCinema)
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+ALTER TABLE Horaires
+ADD CONSTRAINT horaire_idFilm_idCinema_uk
+UNIQUE(idFilm, idCinema);

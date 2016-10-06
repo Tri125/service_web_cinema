@@ -6,115 +6,136 @@ const connexion = require('../helpers/database');
 const QueryHelper = require('../helpers/queries');
 const queries = new QueryHelper();
 
+const CinemaLogic = require("../logic/CinemaLogic");
+const cinemaLogic = new CinemaLogic();
+
+const HoraireLogic = require("../logic/HoraireLogic");
+const horaireLogic = new HoraireLogic();
+
+const validationCinema = require('../validation/cinema');
+
 class CinemaRoutes extends Route {
-    // VAR
-    // ---
-    // app : Référence à l'application.
-    
     constructor(app) {
         super(app);
-        app.post('/cinemas/', this.postCinema); // TODO
-        app.get('/cinemas/', this.getCinemas);
-        app.put('/cinemas/:uuid', this.putCinema); // TODO
-        app.get('/cinemas/:uuid', this.getCinema);
+        app.post('/cinemas/', this.post); // TODO
+        app.get('/cinemas/', this.getAll);
+        app.put('/cinemas/:uuid', this.put); // TODO
+        app.get('/cinemas/:uuid', this.get);
         app.get('/cinemas/:uuid/horaires/', this.getHoraires); // TODO
     }
     
-    postCinema(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error);
+    post(req, res) {
+        super.createResponse(res);
+        
+        let isBody = true;
+        //Body
+	    if (req.query._body && req.query._body === 'false') {
+	        isBody = false;
+	    }
+        
+        req.checkBody(validationCinema.Required());
+        var errorValidation = req.validationErrors();
+        if (errorValidation) {
+            res.status(500);
+            let error = super.createError(500, "Erreur de validation", errorValidation);
+            res.send(error);
+            return;
+        }
+        req.body.uuid = uuid.v4();
+        let query = queries.insertCinema(req.body);
+        
+        connexion.query(query, (error, result) => {
+            if (error) {
+                res.status(500);
+                let errorMessage = super.createError(500, "Erreur de Serveur", error);
+                res.send(errorMessage);
+            } else {
+                cinemaLogic.linking(req.body);
+                req.body.horaires = [];
+                res.status(201);
+                res.location(req.body.url);
+                if (isBody) {
+                    res.send(req.body);  
+                } else {
+                    res.send();
+                }
+            }
+            
+        });
+        
+
     }
     
-    getCinemas(req, res) {
+    getAll(req, res) {
         super.createResponse(res);
-        let offset = null;
-        let limit = null;
-        let fields = null;
-        let expand = false;
+
+        let query = queries.selectCinemas('*', null, null);
         
-        //Fields
-        if (req.query.fields) {
-            fields = req.query.fields;
-        }
-        
-        //Pagination
-        if (req.query.offset) {
-            offset = req.query.offset;
-        }
-        
-        if (req.query.limit) {
-            limit = req.query.limit;
-        }
-        
-        // Expand
-        if (req.query.expand)
-            expand = req.query.expand;
-        
-        let cinemasQuery = sqlcmds.SelectCinemas(fields, limit, offset);
-        
-         //TODO: Expand
-        connexion.Connection().query(cinemasQuery, (error, rows, badFields) => {
+        connexion.query(query, (error, rows, fields) => {
             if (error) {
                 res.status(500);
                 let errorResponse = super.createError(500, "Erreur Serveur", error);
                 res.send(errorResponse);
             } else {
                 res.status(200);
-                async.eachSeries(rows, (cinema, nextgc) => {
-                    CinemaLogic.linking(cinema, (result) => {
-                        nextgc();
-                    }, fields, false, false, expand);
-                }, () => {
+                async.each(rows, (cinema, next) => {
+                    let uuid = cinema.uuid;
+                    cinemaLogic.linking(cinema);
+                    horaireLogic.retrieveView(uuid, 'link', null, null, (resultHoraire) => {
+                        if (resultHoraire.error) {
+                            //Gestion
+                        } else {
+                            cinemaLogic.addHoraires(cinema, resultHoraire.horaires);
+                        }
+                        next();
+                    });
+                }, function SendResponse() {
                     res.send(rows);
                 });
             }
         });
     }
     
-    putCinema(req, res) {
+    put(req, res) {
         let error = super.createError(501, "Erreur Serveur", "Not Implemented");
         res.send(error);
     }
     
-    getCinema(req, res) {
+    get(req, res) {
         super.createResponse(res);
-        let offset = null;
-        let limit = null;
         let fields = null;
-        let expand = false;
-        let uuid = req.params.uuid;
         
         //Fields
-        if (req.query.fields) {
-            fields = req.query.fields;
-        }
+	    if (req.query.fields) {
+	        fields = req.query.fields;
+	        fields = super.prepareFields(fields);
+	    }
         
-        //Pagination
-        if (req.query.offset) {
-            offset = req.query.offset;
-        }
-        
-        if (req.query.limit) {
-            limit = req.query.limit;
-        }
-        
-        // Expand
-        if (req.query.expand)
-            expand = req.query.expand;
-        
-        let cinemaQuery = sqlcmds.SelectCinema(uuid, fields, limit, offset);
-        
-         //TODO: Expand
-        connexion.Connection().query(cinemaQuery, (error, rows, badFields) => {
-            if (error) {
+        cinemaLogic.retrieve('*', req.params.uuid, (result) => {
+            if (result.error) {
                 res.status(500);
-                let errorResponse = super.createError(500, "Erreur Serveur", error);
+                let errorResponse = super.createError(500, "Erreur Serveur", result.error);
                 res.send(errorResponse);
+            } else if (result.length === 0) {
+                res.status(404);
+                res.send();
             } else {
                 res.status(200);
-                CinemaLogic.linking(rows[0], (result) => {
-                    res.send(rows[0]);
-                }, fields, false, false, expand);
+                let cinemaResponse = result.cinema;
+                horaireLogic.retrieveView(req.params.uuid, 'link', null, null, (resultHoraire) => {
+                    if (resultHoraire.error) {
+                        //Gestion
+                    } else {
+                        cinemaLogic.addHoraires(cinemaResponse, resultHoraire.horaires);
+                    }
+                    if (fields) {
+                        cinemaLogic.handleFields(cinemaResponse, fields, (cinemaResponse) => {
+                            res.send(cinemaResponse);
+                        });
+                    } else {
+                        res.send(cinemaResponse);
+                    }
+                });
             }
         });
     }
@@ -126,43 +147,7 @@ class CinemaRoutes extends Route {
         let fields = null;
         let expand = false;
         
-        //Fields
-        if (req.query.fields) {
-            fields = req.query.fields;
-        }
-        
-        //Pagination
-        if (req.query.offset) {
-            offset = req.query.offset;
-        }
-        
-        if (req.query.limit) {
-            limit = req.query.limit;
-        }
-        
-        // Expand
-        if (req.query.expand)
-            expand = req.query.expand;
-        
-        let horairesQuery = sqlcmds.SelectHoraires(req.params.uuid, fields, limit, offset);
-        
-         //TODO: Expand
-        connexion.Connection().query(horairesQuery, (error, rows, badFields) => {
-            if (error) {
-                res.status(500);
-                let errorResponse = super.createError(500, "Erreur Serveur", error);
-                res.send(errorResponse);
-            } else {
-                res.status(200);
-                async.eachSeries(rows, (horaire, next) => {
-                    HoraireLogic.linking(horaire, req.params.uuid, (result) => {
-                        next();
-                    }, fields, false, false, expand);
-                }, () => {
-                    res.send(rows);
-                });
-            }
-        });
+       
     }
 }
 
