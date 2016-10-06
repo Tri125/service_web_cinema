@@ -91,7 +91,7 @@ module.exports = class CinemaLogic {
     }
     
     retrieveHoraires(cinema, callback) {
-       horaireLogic.retrieveView(cinema.uuid, 'link', (resultHoraires) => {
+       horaireLogic.retrieveView(cinema.uuid, 'link', null, null (resultHoraires) => {
            if (resultHoraires.error) {
                //Gestion
             } else {

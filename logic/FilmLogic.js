@@ -101,7 +101,7 @@ module.exports = class FilmLogic {
     }
     
     retrieveCommentaires(film, callback) {
-       commentaireLogic.retrieveView(film.uuid, 'link', (resultCommentaire) => {
+       commentaireLogic.retrieveView(film.uuid, 'link', null, null, (resultCommentaire) => {
            if (resultCommentaire.error) {
                //Gestion
             } else {
@@ -131,7 +131,7 @@ module.exports = class FilmLogic {
                         callback(result);
                     } else {
                         let filmResponse = resultFilm.film;
-                        commentaireLogic.retrieveView(uuid, 'link', (resultCommentaire) => {
+                        commentaireLogic.retrieveView(uuid, 'link', null, null, (resultCommentaire) => {
                             if (resultCommentaire.error) {
                                 //Gestion
                             } else {
