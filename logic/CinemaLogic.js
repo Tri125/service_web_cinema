@@ -100,33 +100,33 @@ module.exports = class CinemaLogic {
            callback(cinema);
        });
     }
-    /*
-    handlePatch(uuid, film, callback) {
-        let query = queries.patchFilm(uuid, film);
+    
+    handlePut(uuid, cinema, callback) {
+        let query = queries.updateCinema(uuid, cinema);
         
-        connexion.query(query, (error, patchResult) => {
+        connexion.query(query, (error, updateResult) => {
             let result = {};
             
             if (error) {
                 result.error = error;
                 callback(result);
             } else {
-                this.retrieve('*', uuid, (resultFilm) => {
-                    if (resultFilm.error) {
-                        result.error = resultFilm.error;
+                this.retrieve('*', uuid, (resultCinema) => {
+                    if (resultCinema.error) {
+                        result.error = resultCinema.error;
                         callback(result);
-                    } else if (resultFilm.length === 0) {
-                        result.error = "Le film n'existe pas.";
+                    } else if (resultCinema.length === 0) {
+                        result.error = "Le cinema n'existe pas.";
                         callback(result);
                     } else {
-                        let filmResponse = resultFilm.film;
-                        commentaireLogic.retrieveView(uuid, 'link', (resultCommentaire) => {
-                            if (resultCommentaire.error) {
+                        let cinemaResponse = resultCinema.cinema;
+                        horaireLogic.retrieveView(uuid, 'link', null, null, (resultHoraire) => {
+                            if (resultHoraire.error) {
                                 //Gestion
                             } else {
-                                this.addCommentaires(filmResponse, resultCommentaire.commentaires);
+                                this.addHoraires(cinemaResponse, resultHoraire.horaires);
                             }
-                            result.film = filmResponse;
+                            result.cinema = cinemaResponse;
                             callback(result);
                             
                         });
@@ -134,5 +134,5 @@ module.exports = class CinemaLogic {
                 });
             }
         });
-    } */
+    }
 };

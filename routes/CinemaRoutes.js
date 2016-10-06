@@ -97,8 +97,27 @@ class CinemaRoutes extends Route {
     }
     
     put(req, res) {
-        let error = super.createError(501, "Erreur Serveur", "Not Implemented");
-        res.send(error);
+        super.createResponse(res);
+        
+        req.checkBody(validationCinema.Required());
+        var errorValidation = req.validationErrors();
+        if (errorValidation) {
+            res.status(500);
+            let error = super.createError(500, "Erreur de validation", errorValidation);
+            res.send(error);
+            return;
+        }
+        
+        cinemaLogic.handlePut(req.params.uuid, req.body, (result) => {
+            if (result.error) {
+                res.status(500);
+                let errorResponse = super.createError(500, "Erreur Serveur", result.error);
+                res.send(errorResponse);
+            } else {
+                res.status(200);
+                res.send(result.cinema);
+            }
+        });
     }
     
     get(req, res) {

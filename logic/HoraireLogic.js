@@ -84,4 +84,5 @@ module.exports = class HoraireLogic {
             callback(result);
         });
     }
+    
 };

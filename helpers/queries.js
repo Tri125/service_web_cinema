@@ -71,6 +71,14 @@ class Queries {
         return query;
     }
     
+    updateCinema(uuid, cinema) {
+        let query = "UPDATE Cinemas SET nom = {0}, adresse = {1}, ville = {2}, codePostal = {3}, telephone = {4} WHERE uuid = {5}";
+        query = query.format(connexion.escape(cinema.nom), connexion.escape(cinema.adresse), connexion.escape(cinema.ville), 
+        connexion.escape(cinema.codePostal), connexion.escape(cinema.telephone), connexion.escape(uuid));
+        
+        return query;
+    }
+    
     patchFilm(uuid, film) {
         let query = "UPDATE Films SET ";
         if (film.titre)
