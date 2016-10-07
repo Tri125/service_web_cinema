@@ -161,12 +161,20 @@ class CinemaRoutes extends Route {
     
     getHoraires(req, res) {
         super.createResponse(res);
-        let offset = null;
-        let limit = null;
-        let fields = null;
-        let expand = false;
         
-       
+       horaireLogic.retrieveView(req.params.uuid, 'default', null, null, (result) => {
+           if (result.error) {
+               res.status(500);
+               let errorResponse = super.createError(500, "Erreur Serveur", result.error);
+               res.send(errorResponse);
+           } else if (result.length === 0) {
+               res.status(404);
+               res.send();
+           } else {
+               res.status(200);
+               res.send(result.horaires);
+           }
+       });
     }
 }
 

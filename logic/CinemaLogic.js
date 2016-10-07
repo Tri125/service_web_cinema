@@ -89,9 +89,9 @@ module.exports = class CinemaLogic {
         delete cinema.telephone;
         delete cinema.horaires;
     }
-    
+/*    
     retrieveHoraires(cinema, callback) {
-       horaireLogic.retrieveView(cinema.uuid, 'link', null, null (resultHoraires) => {
+       horaireLogic.retrieveView(cinema.uuid, 'link', null, null, (resultHoraires) => {
            if (resultHoraires.error) {
                //Gestion
             } else {
@@ -100,7 +100,7 @@ module.exports = class CinemaLogic {
            callback(cinema);
        });
     }
-    
+*/   
     handlePut(uuid, cinema, callback) {
         let query = queries.updateCinema(uuid, cinema);
         
