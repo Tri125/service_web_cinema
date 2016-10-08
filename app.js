@@ -1,10 +1,16 @@
+//Include du serveur web
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+//Include du validateur. Utilisé pour validé le format des données envoyés par POST/PUT/PATCH.
 var expressValidator = require('express-validator');
 
+//Sert du contenu statique du fichier interne /public disponible à l'adresse statique localhost/static.
+app.use('/static', express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(expressValidator());
+
+//Include des routes de nos ressources.
 const FilmRoutes = require("./routes/FilmRoutes");
 const CinemaRoutes = require("./routes/CinemaRoutes");
 

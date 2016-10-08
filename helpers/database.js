@@ -1,3 +1,5 @@
+//Connexion Mysql.
+
 var mysql = require("mysql");
 module.exports = mysql.createConnection({
    host:process.env.IP,

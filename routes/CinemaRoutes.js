@@ -69,7 +69,7 @@ class CinemaRoutes extends Route {
     getAll(req, res) {
         super.createResponse(res);
 
-        let query = queries.selectCinemas('*', null, null);
+        let query = queries.selectCinemas(null, null);
         
         connexion.query(query, (error, rows, fields) => {
             if (error) {
@@ -108,7 +108,9 @@ class CinemaRoutes extends Route {
             return;
         }
         
-        cinemaLogic.handlePut(req.params.uuid, req.body, (result) => {
+        req.body.uuid = req.params.uuid;
+        
+        cinemaLogic.handlePut(req.body, (result) => {
             if (result.error) {
                 res.status(500);
                 let errorResponse = super.createError(500, "Erreur Serveur", result.error);
@@ -130,7 +132,7 @@ class CinemaRoutes extends Route {
 	        fields = super.prepareFields(fields);
 	    }
         
-        cinemaLogic.retrieve('*', req.params.uuid, (result) => {
+        cinemaLogic.retrieve(req.params.uuid, (result) => {
             if (result.error) {
                 res.status(500);
                 let errorResponse = super.createError(500, "Erreur Serveur", result.error);
