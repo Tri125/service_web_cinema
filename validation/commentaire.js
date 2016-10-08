@@ -1,3 +1,5 @@
+//Contient les règles de validation d'un objet Commentaire.
+
 module.exports = class CommentaireValidator {
   
   static Required() {
@@ -32,7 +34,7 @@ module.exports = class CommentaireValidator {
     };
   }
   
-  
+  //J'étais incapable de juste modifier Required au runtime pour rentre les champs optionnels.
   static Optional() {
     return {
       'texte': {

@@ -1,3 +1,5 @@
+//Contient les règles de validations d'un objet Film. 
+
 module.exports = class FilmValidator {
   
   static Required() {
@@ -66,7 +68,7 @@ module.exports = class FilmValidator {
     };
   }
   
-  
+  //J'étais incapable de juste modifier Required au runtime pour rentre les champs optionnels.
   static Optional() {
     return {
       'titre': {

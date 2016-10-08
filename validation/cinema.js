@@ -1,3 +1,5 @@
+//Contient les règles de validations pour un objet Cinema.
+
 module.exports = class CinemaValidator {
   
   static Required() {
