@@ -2,9 +2,12 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var cors = require('cors');
+
 //Include du validateur. Utilisé pour validé le format des données envoyés par POST/PUT/PATCH.
 var expressValidator = require('express-validator');
 
+app.use(cors());
 //Sert du contenu statique du fichier interne /public disponible à l'adresse statique localhost/static.
 app.use('/static', express.static(__dirname + '/public'));
 app.use(bodyParser.json());

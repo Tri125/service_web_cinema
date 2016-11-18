@@ -14,7 +14,7 @@ CREATE TABLE Films (
     uuid VARCHAR(36) NOT NULL UNIQUE,
     titre VARCHAR(255) NOT NULL UNIQUE,
     pays VARCHAR(100) NOT NULL,
-    genre VARCHAR(20) NOT NULL,
+    genre VARCHAR(25) NOT NULL,
     classe VARCHAR(3) NOT NULL,
     duree INT NOT NULL,
     realisateur VARCHAR(100) NOT NULL,
