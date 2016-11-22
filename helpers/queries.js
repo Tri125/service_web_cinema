@@ -28,7 +28,7 @@ class Queries {
     //Fonction qui retourne la requête sélectionnant les horaires d'un cinéma passant par paramètre le uuid du cinéma.
     //Prend en paramètre l'uuid du cinéma désiré.
     selectHoraireCinema(uuidCinema) {
-        let query = "SELECT h.uuid, h.idHoraire, f.uuid AS uuidFilm, c.uuid AS uuidCinema, dateHeure FROM Horaires AS h INNER JOIN Cinemas AS c ON c.idCinema = h.idCinema INNER JOIN Films AS f ON f.idFilm = h.idFilm  WHERE c.uuid = {0}"; 
+        let query = "SELECT h.uuid, h.idHoraire, f.uuid AS uuidFilm, c.uuid AS uuidCinema, dateHeure, titre FROM Horaires AS h INNER JOIN Cinemas AS c ON c.idCinema = h.idCinema INNER JOIN Films AS f ON f.idFilm = h.idFilm  WHERE c.uuid = {0}";
         //Échapement de uuidCinema pour prévenir les injections sql.
         query = query.format(connexion.escape(uuidCinema));
         return query;

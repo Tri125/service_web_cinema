@@ -59,5 +59,5 @@ CREATE TABLE Horaires (
 ) CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 ALTER TABLE Horaires
-ADD CONSTRAINT horaire_idFilm_idCinema_uk
-UNIQUE(idFilm, idCinema);
+ADD CONSTRAINT horaire_idFilm_idCinema_dateHeure_uk
+UNIQUE(idFilm, idCinema, dateHeure);

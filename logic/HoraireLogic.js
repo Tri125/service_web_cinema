@@ -15,7 +15,9 @@ module.exports = class HoraireLogic {
         horaire.cinema = {};
         horaire.cinema.url = utils.baseUrl + "/cinemas/" + horaire.uuidCinema;
         horaire.film = {};
-        horaire.film.url = utils.baseUrl + "/cinemas/" + horaire.uuidFilm;
+        horaire.film.url = utils.baseUrl + "/films/" + horaire.uuidFilm;
+        horaire.film.titre = horaire.titre;
+        delete horaire.titre;
         delete horaire.uuid;
         delete horaire.idHoraire;
         delete horaire.uuidCinema;
